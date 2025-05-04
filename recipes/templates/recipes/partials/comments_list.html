@@ -1,0 +1,7 @@
+<div id="commentsList">
+  {% for comment in recipe.comments.all %}
+    {% include "recipes/partials/comment_item.html" with comment=comment user=request.user %}
+  {% empty %}
+    <p>Немає коментарів. Станьте першим!</p>
+  {% endfor %}
+</div>

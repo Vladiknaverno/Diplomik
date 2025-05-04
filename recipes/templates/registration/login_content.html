@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="auth-wrapper">
+    <div class="auth-container">
+      <div class="auth-header">
+        <h2 class="auth-title"><i class="fas fa-sign-in-alt"></i> Вхід до акаунту</h2>
+        <div class="auth-decoration"></div>
+      </div>
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="id_username"><i class="fas fa-user"></i> Ім'я користувача</label>
+          {{ form.username }}
+          <div class="input-focus-line"></div>
+        </div>
+        <div class="form-group">
+          <label for="id_password"><i class="fas fa-lock"></i> Пароль</label>
+          {{ form.password }}
+          <div class="input-focus-line"></div>
+        </div>
+        <button type="submit" class="auth-btn">
+          <span class="btn-icon"><i class="fas fa-sign-in-alt"></i></span>
+          <span class="btn-text">Увійти</span>
+          <span class="btn-arrow">→</span>
+        </button>
+        <input type="hidden" name="next" value="{{ next }}">
+      </form>
+      <div class="auth-links">
+        <p>Немає акаунту? <a href="{% url 'register' %}"><i class="fas fa-user-plus"></i> Зареєструватися</a></p>
+        <a href="#" class="forgot-password">Забули пароль?</a>
+      </div>
+    </div>
+  </div>
+</div>

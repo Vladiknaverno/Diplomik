@@ -1,0 +1,11 @@
+<form
+  hx-post="{% url 'like_recipe' recipe.id %}"
+  hx-target="this"
+  hx-swap="outerHTML"
+>
+  {% csrf_token %}
+  <button type="submit" class="like-btn {% if is_liked %}liked{% endif %}">
+    <i class="fas fa-heart"></i>
+    <span class="like-count">{{ recipe.like_count }}</span>
+  </button>
+</form>

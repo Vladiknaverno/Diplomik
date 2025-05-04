@@ -1,0 +1,82 @@
+<!-- ✅ FULL FIXED ADD_RECIPE_CONTENT.HTML (updated) -->
+{% if not user.is_authenticated %}
+  <div class="alert alert-warning">
+    Щоб додати рецепт, будь ласка <a href="{% url 'login' %}?next={{ request.path }}">увійдіть</a>
+    або <a href="{% url 'register' %}">зареєструйтесь</a>.
+  </div>
+{% else %}
+  <div class="page-header">
+    <h1 class="page-title">Створіть кулінарний шедевр</h1>
+    <p class="page-subtitle">Поділіться своїм унікальним рецептом зі спільнотою</p>
+  </div>
+
+  <div class="recipe-form-container">
+    <form method="post" enctype="multipart/form-data" class="recipe-form">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="{{ form.title.id_for_label }}"><i class="fas fa-heading"></i> Назва рецепту</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div class="error">{{ form.title.errors }}</div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.description.id_for_label }}"><i class="fas fa-align-left"></i> Опис</label>
+        {{ form.description }}
+        {% if form.description.errors %}<div class="error">{{ form.description.errors }}</div>{% endif %}
+      </div>
+
+      <!-- ✅ Фіксоване поле категорій через form.categories -->
+      <div class="form-group">
+        <label for="id_categories"><i class="fas fa-tags"></i> Категорії</label>
+        {{ form.categories }}
+        {% if form.categories.errors %}<div class="error">{{ form.categories.errors }}</div>{% endif %}
+        <small class="form-text text-muted">Почніть вводити назву категорії</small>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.ingredients.id_for_label }}"><i class="fas fa-list-ul"></i> Інгредієнти</label>
+        {{ form.ingredients }}
+        {% if form.ingredients.errors %}<div class="error">{{ form.ingredients.errors }}</div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.steps.id_for_label }}"><i class="fas fa-list-ol"></i> Кроки приготування</label>
+        {{ form.steps }}
+        {% if form.steps.errors %}<div class="error">{{ form.steps.errors }}</div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.cooking_time.id_for_label }}"><i class="fas fa-clock"></i> Час приготування (хвилин)</label>
+        {{ form.cooking_time }}
+        {% if form.cooking_time.errors %}<div class="error">{{ form.cooking_time.errors }}</div>{% endif %}
+      </div>
+
+      <div class="image-upload-wrapper">
+        <label><i class="fas fa-camera"></i> Зображення страви</label>
+        <div class="image-upload-container">
+          <div class="image-upload" id="imageUploadArea" role="button">
+            <div class="upload-icon-text">
+              <i class="fas fa-camera"></i>
+              <div class="upload-text">Натисніть або перетягніть фото</div>
+            </div>
+            <input type="file" id="image-upload-input" name="image" accept="image/*" style="display: none;">
+          </div>
+          <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
+            <div class="image-preview" id="imagePreview"></div>
+            <button type="button" class="remove-image-btn" id="removeImageBtn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="file-name" id="fileName"></div>
+      </div>
+
+      <div class="buttons-container">
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-utensils"></i> Опублікувати рецепт
+        </button>
+      </div>
+    </form>
+  </div>
+{% endif %}

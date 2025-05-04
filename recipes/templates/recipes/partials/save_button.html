@@ -1,0 +1,17 @@
+{% if request.user.is_authenticated %}
+  <button
+    hx-post="{% if is_saved %}{% url 'unsave_recipe' recipe.pk %}{% else %}{% url 'save_recipe' recipe.pk %}{% endif %}"
+    hx-target="this"
+    hx-swap="outerHTML"
+    class="save-btn {% if is_saved %}saved{% endif %}">
+    {% if is_saved %}
+      <i class="fas fa-bookmark"></i> Збережено
+    {% else %}
+      <i class="far fa-bookmark"></i> Зберегти
+    {% endif %}
+  </button>
+{% else %}
+  <button onclick="alert('Будь ласка, увійдіть, щоб зберігати рецепти')" class="save-btn">
+    <i class="far fa-bookmark"></i> Зберегти
+  </button>
+{% endif %}

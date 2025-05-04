@@ -1,0 +1,230 @@
+{% load static %}
+<div class="recipe-detail-container">
+  <div class="recipe-detail">
+    <div class="recipe-header">
+      <div class="recipe-image-container">
+        {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
+        {% else %}
+        <div class="no-image-placeholder">
+          <i class="fas fa-utensils"></i>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="recipe-header-content">
+        <h1 class="recipe-title">{{ recipe.title }}</h1>
+
+        <div class="recipe-meta">
+          <div class="recipe-meta-item">
+            <i class="fas fa-user"></i>
+            <span>{{ recipe.author.username }}</span>
+          </div>
+          <div class="recipe-meta-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span>{{ recipe.created_at|date:"d.m.Y" }}</span>
+          </div>
+          {% if recipe.cooking_time %}
+          <div class="recipe-meta-item">
+            <i class="fas fa-clock"></i>
+            <span>{{ recipe.cooking_time }} хв</span>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if recipe.categories.all %}
+        <div class="categories-container">
+          {% for category in recipe.categories.all %}
+          <span class="category-tag">
+            <i class="fas {{ category.icon }}"></i>
+            {{ category.name }}
+          </span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="recipe-actions">
+      <div class="action-group">
+        <div class="rating-container" data-recipe-id="{{ recipe.id }}">
+          {% for i in "12345" %}
+            {% with num=i|add:"0" %}
+              <i class="fa-star {% if recipe.rating|default:0 >= num %}fas{% else %}far{% endif %}"
+                 data-value="{{ num }}"></i>
+            {% endwith %}
+          {% endfor %}
+          <span class="rating-value">({{ recipe.rating|default:"0.0" }})</span>
+        </div>
+
+        {% include "recipes/partials/save_button.html" %}
+      </div>
+
+      <div class="share-buttons">
+        <button class="share-btn" onclick="shareRecipe('link')">
+          <i class="fas fa-link"></i>
+        </button>
+        <button class="share-btn" onclick="shareRecipe('telegram')">
+          <i class="fab fa-telegram"></i>
+        </button>
+        <button class="share-btn" onclick="shareRecipe('viber')">
+          <i class="fab fa-viber"></i>
+        </button>
+        <button class="share-btn" onclick="shareRecipe('facebook')">
+          <i class="fab fa-facebook"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="recipe-content">
+      {% if recipe.description %}
+      <div class="recipe-info-section">
+        <h2><i class="fas fa-align-left"></i> Опис</h2>
+        <p>{{ recipe.description }}</p>
+      </div>
+      {% endif %}
+
+      <div class="recipe-info-section">
+        <h2><i class="fas fa-shopping-basket"></i> Інгредієнти</h2>
+        <ul class="ingredients-list">
+          {% for ingredient in recipe.ingredients_as_list %}
+          <li>{{ ingredient }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="recipe-info-section">
+        <h2><i class="fas fa-list-ol"></i> Приготування</h2>
+        <ol class="steps-list">
+          {% for step in recipe.steps_as_list %}
+          <li>{{ step }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      {% if recipe.cooking_time %}
+      <div class="recipe-info-section">
+        <h2><i class="fas fa-clock"></i> Час приготування</h2>
+        <div class="cooking-time">
+          <span>{{ recipe.cooking_time }} хвилин</span>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Коментарі (залишаємо без змін) -->
+  <div class="comments-section">
+    <h2>Коментарі</h2>
+
+    {% if request.user.is_authenticated %}
+    <form id="commentForm"
+          hx-post="{% url 'add_comment' recipe.pk %}"
+          hx-target="#commentsList"
+          hx-swap="outerHTML"
+          hx-include="[name='comment_text']">
+      {% csrf_token %}
+      <textarea name="comment_text" rows="3" placeholder="Ваш коментар..." required class="form-control" style="margin-bottom: 10px;"></textarea>
+      <button type="submit" class="btn" style="margin-bottom: 20px;"><i class="fas fa-paper-plane" ></i> Додати коментар</button>
+    </form>
+    {% else %}
+    <p>Щоб залишити коментар, <a href="{% url 'login' %}" style="color: var(--accent); text-decoration: underline;">увійдіть</a> в акаунт.</p>
+    {% endif %}
+
+    {% include "recipes/partials/comments_list.html" %}
+  </div>
+
+  <a href="{% url 'all_recipes' %}" class="back-btn">
+    <i class="fas fa-arrow-left"></i> До всіх рецептів
+  </a>
+</div>
+
+<script>
+  // Рейтинг: 5 зірок
+  function shareRecipe(platform) {
+    const url = window.location.href;
+    const title = '{{ recipe.title }}';
+    const text = 'Спробуйте цей чудовий рецепт: ' + title;
+
+    switch(platform) {
+      case 'link':
+        navigator.clipboard.writeText(url)
+          .then(() => alert('Посилання скопійовано!'))
+          .catch(() => prompt('Скопіюйте посилання:', url));
+        break;
+      case 'telegram':
+        window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+        break;
+      case 'viber':
+        window.open(`viber://forward?text=${encodeURIComponent(text + ' ' + url)}`);
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`);
+        break;
+    }
+  }
+
+  // Рейтинг
+  document.querySelectorAll('.rating-container i').forEach(star => {
+    star.addEventListener('click', function() {
+      {% if not request.user.is_authenticated %}
+        alert('Будь ласка, увійдіть, щоб оцінювати рецепти');
+        return;
+      {% endif %}
+
+      const value = this.dataset.value;
+      const container = this.closest('.rating-container');
+      const recipeId = container.dataset.recipeId;
+
+      fetch(`/recipe/${recipeId}/rate/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ rating: value })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const rating = parseFloat(data.rating);
+        container.querySelectorAll('i').forEach((el, i) => {
+          el.className = (i < Math.round(rating) ? 'fas' : 'far') + ' fa-star';
+        });
+        container.querySelector('.rating-value').textContent = `(${rating.toFixed(1)})`;
+      });
+    });
+  });
+
+  // Збереження рецептів
+  document.querySelectorAll('.save-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      {% if not request.user.is_authenticated %}
+        alert('Будь ласка, увійдіть, щоб зберігати рецепти');
+        return;
+      {% endif %}
+
+      const recipeId = this.dataset.recipeId;
+      const isSaved = this.classList.contains('saved');
+      const url = isSaved ? `/recipe/${recipeId}/unsave/` : `/recipe/${recipeId}/save/`;
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => response.json())
+      .then(data => {
+        this.classList.toggle('saved');
+        if (data.saved) {
+          this.innerHTML = '<i class="fas fa-bookmark"></i> Збережено';
+        } else {
+          this.innerHTML = '<i class="far fa-bookmark"></i> Зберегти';
+        }
+      });
+    });
+  });
+</script>
+

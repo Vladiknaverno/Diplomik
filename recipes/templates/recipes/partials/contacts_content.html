@@ -1,0 +1,61 @@
+{% load static %}
+
+<section class="contacts-hero">
+    <h1>Зв'яжіться з нами</h1>
+    <p>Ми завжди раді вашому зворотному зв'язку</p>
+</section>
+
+<section class="contacts-content">
+    <div class="contacts-grid">
+        <!-- Форма -->
+        <div class="contact-form">
+            <h2>Напишіть нам</h2>
+            <form method="post" action="/send-message/">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="Ваше ім'я" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <textarea name="message" placeholder="Ваше повідомлення..." required></textarea>
+                </div>
+                <button type="submit" class="btn">Надіслати</button>
+            </form>
+        </div>
+
+        <!-- Контакти -->
+        <div class="contact-info">
+            <h2>Наші контакти</h2>
+            <div class="info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <p>м. Фастів</p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-phone"></i>
+                <p>+380 96 281 74 62 (Владислав)</p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-envelope"></i>
+                <p>vladislaviktwink@gmail.com</p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <p>Пн-Пт: 9:00-18:00</p>
+            </div>
+
+            <h3>Ми в соцмережах</h3>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-telegram"></i></a>
+            </div>
+
+            <div class="map-container">
+                <iframe src="https://www.google.com/maps/embed?..." width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,26 @@
+<div id="comment-{{ comment.id }}" class="comment-card">
+  <div class="comment-header">
+    <strong>{{ comment.user.username }}</strong>
+    <span class="comment-date">({{ comment.created_at|date:"d.m.Y H:i" }})</span>
+  </div>
+
+  <div class="comment-body">
+    <p>{{ comment.text|linebreaksbr }}</p> <!-- 🛠️ Додаємо <p> і перенос рядків -->
+  </div>
+
+  {% if user.is_authenticated and comment.user == user %}
+    <div class="comment-actions">
+      <button onclick="editComment({{ comment.id }})" class="btn-comment edit-btn">
+        Редагувати
+      </button>
+      <button
+        hx-post="{% url 'delete_comment' comment.id %}"
+        hx-confirm="Ви впевнені, що хочете видалити цей коментар?"
+        hx-target="#commentsList"
+        hx-swap="outerHTML"
+        class="btn-comment delete-btn">
+        Видалити
+      </button>
+    </div>
+  {% endif %}
+</div>

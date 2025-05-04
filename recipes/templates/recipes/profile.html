@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+  {% include "recipes/partials/profile_content.html" %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}

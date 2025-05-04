@@ -1,0 +1,243 @@
+{% load static %}
+<div class="container profile-page">
+  <!-- Шапка профілю -->
+  <section class="profile-header">
+    <h1>Мій кулінарний профіль</h1>
+    <p>Керуйте своїми рецептами та налаштуваннями</p>
+  </section>
+
+  <!-- Інформація про користувача -->
+  <section class="profile-info">
+    {% if user.profile_picture %}
+    <img src="{{ user.profile_picture.url }}" alt="Аватар" class="profile-avatar">
+    {% else %}
+    <img src="{% static 'recipes/default-avatar.png' %}" alt="Аватар" class="profile-avatar">
+    {% endif %}
+
+    <div class="user-details">
+      <p><strong>Нікнейм:</strong> {{ user.username }}</p>
+      <p><strong>Дата реєстрації:</strong> {{ user.date_joined|date:"d.m.Y" }}</p>
+
+      <button id="editBtn" class="btn btn-primary" style="margin-top: 15px;">
+        <i class="fas fa-edit"></i> Редагувати профіль
+      </button>
+    </div>
+
+    <div class="profile-stats" style="height: 40px;">
+      <div class="stat-item">
+        <div class="stat-value">{{ recipes.count }}</div>
+        <div class="stat-label">Рецептів</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ avg_rating|default:"0.0" }}
+          {% for i in "12345" %}
+            {% with num=i|add:"0" %}
+              <i class="fa-star {% if avg_rating >= num %}fas{% else %}far{% endif %}"></i>
+            {% endwith %}
+          {% endfor %}
+        </div>
+        <div class="stat-label">Середній рейтинг</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Мої рецепти -->
+  <section id="my-recipes">
+    <h2 class="section-title"><i class="fas fa-book-open"></i> Мої рецепти</h2>
+
+    {% if recipes %}
+    <div class="recipes-grid">
+      {% for recipe in recipes|slice:":4" %}
+      <div class="recipe-card">
+        <div class="recipe-img-container">
+          {% if recipe.image %}
+          <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-img">
+          {% else %}
+          <div class="no-image"><i class="fas fa-utensils fa-2x"></i></div>
+          {% endif %}
+        </div>
+
+        <div class="recipe-content">
+          <h3 class="recipe-title">{{ recipe.title }}</h3>
+          <p class="recipe-meta">
+            <i class="fas fa-calendar-alt"></i> {{ recipe.created_at|date:"d.m.Y" }}
+            <i class="fas fa-star"></i> {{ recipe.rating|default:"0.0" }}
+          </p>
+
+          <div class="recipe-actions">
+            <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-primary">
+              <i class="fas fa-eye"></i>
+            </a>
+            <a href="{% url 'edit_recipe' recipe.pk %}" class="btn btn-edit">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'delete_recipe' recipe.pk %}" class="btn btn-delete">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if recipes|length > 4 %}
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="{% url 'user_recipes' user.username %}" class="btn btn-primary">
+        <i class="fas fa-list"></i> Всі мої рецепти ({{ recipes.count }})
+      </a>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-profile" style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 15px;">
+      <p style="font-size: 1.2rem; margin-bottom: 20px;">У вас ще немає рецептів 🥲</p>
+      <a href="{% url 'add_recipe' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Додати перший рецепт
+      </a>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Збережені рецепти -->
+  <section id="saved-recipes" style="margin-top: 50px;">
+    <h2 class="section-title"><i class="fas fa-bookmark"></i> Збережені рецепти</h2>
+
+    {% if saved_recipes %}
+    <div class="recipes-grid">
+      {% for recipe in saved_recipes|slice:":4" %}
+      <div class="recipe-card">
+        <div class="recipe-img-container">
+          {% if recipe.image %}
+          <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-img">
+          {% else %}
+          <div class="no-image"><i class="fas fa-utensils fa-2x"></i></div>
+          {% endif %}
+        </div>
+
+        <div class="recipe-content">
+          <h3 class="recipe-title">{{ recipe.title }}</h3>
+          <p class="recipe-meta">
+            <i class="fas fa-user"></i> {{ recipe.author.username }}
+            <i class="fas fa-calendar-alt"></i> {{ recipe.created_at|date:"d.m.Y" }}
+          </p>
+
+          <div class="recipe-actions">
+            <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-primary">
+              <i class="fas fa-eye"></i> Переглянути
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if saved_recipes|length > 4 %}
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="{% url 'saved_recipes' %}" class="btn btn-primary">
+        <i class="fas fa-list"></i> Всі збережені рецепти ({{ saved_recipes.count }})
+      </a>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-profile" style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 15px;">
+      <p style="font-size: 1.2rem;">Нічого не збережено 😐</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Керування акаунтом -->
+  <section class="account-management" style="margin-top: 50px;">
+    <h3><i class="fas fa-cog"></i> Керування акаунтом</h3>
+
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+      <button id="changePasswordBtn" class="btn btn-edit">
+        <i class="fas fa-key"></i> Змінити пароль
+      </button>
+
+      <button id="deleteAccountBtn" class="btn btn-delete">
+        <i class="fas fa-user-slash"></i> Видалити акаунт
+      </button>
+    </div>
+
+    <div id="confirmationDialog" class="confirmation-dialog">
+      <p><strong>Увага!</strong> Ви дійсно бажаєте видалити акаунт? Ця дія є незворотною.</p>
+      <form method="POST" action="{% url 'delete_account' %}" id="deleteAccountForm">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-delete">
+          <i class="fas fa-check"></i> Підтвердити видалення
+        </button>
+        <button type="button" class="btn btn-primary" id="cancelDeleteBtn">
+          <i class="fas fa-times"></i> Скасувати
+        </button>
+      </form>
+    </div>
+  </section>
+</div>
+
+<!-- Модальне вікно редагування профілю -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModal">&times;</span>
+    <h2><i class="fas fa-user-edit"></i> Редагування профілю</h2>
+
+    <form method="POST" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="username">Нікнейм</label>
+        <input type="text" id="username" name="username" value="{{ user.username }}" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+      </div>
+
+      <div class="form-group">
+        <label for="avatar">Фото профілю</label>
+        <input type="file" id="avatar" name="avatar" accept="image/*">
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-top: 25px;">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Зберегти зміни
+        </button>
+        <button type="button" class="btn btn-delete" id="cancelEdit">
+          <i class="fas fa-times"></i> Скасувати
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Редагування профілю
+document.getElementById('editBtn').addEventListener('click', function() {
+  document.getElementById('editModal').style.display = 'block';
+});
+
+document.getElementById('closeModal').addEventListener('click', function() {
+  document.getElementById('editModal').style.display = 'none';
+});
+
+document.getElementById('cancelEdit').addEventListener('click', function() {
+  document.getElementById('editModal').style.display = 'none';
+});
+
+// Видалення акаунту
+document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+  document.getElementById('confirmationDialog').style.display = 'block';
+});
+
+document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+  document.getElementById('confirmationDialog').style.display = 'none';
+});
+
+// Закриття модального вікна при кліку поза ним
+window.addEventListener('click', function(event) {
+  if (event.target == document.getElementById('editModal')) {
+    document.getElementById('editModal').style.display = 'none';
+  }
+});
+</script>

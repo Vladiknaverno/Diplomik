@@ -1,0 +1,93 @@
+<style>
+    .categories-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .category-group {
+        margin-bottom: 40px;
+    }
+
+    .category-group h2 {
+        color: var(--accent);
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 10px;
+    }
+
+    .categories-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .category-card {
+        background: var(--card-bg);
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        transition: transform 0.3s;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(255, 107, 0, 0.1);
+    }
+
+    .category-card h3 {
+        color: var(--accent);
+        margin-top: 0;
+    }
+
+    .subcategories {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .subcategory {
+        background: rgba(255, 107, 0, 0.1);
+        color: var(--accent);
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .subcategory:hover {
+        background: var(--accent);
+        color: white;
+    }
+</style>
+{% block content %}
+<div class="categories-container">
+    <h1>Категорії рецептів</h1>
+
+    {% for title, categories in main_categories.items %}
+    <div class="category-group">
+        <h2>{{ title }}</h2>
+        <div class="categories-list">
+            {% for category in categories %}
+            <div class="category-card">
+                <a href="{% url 'category_detail' category.slug %}">
+                    <h3>{{ category.name }}</h3>
+                </a>
+                {% if category.children.all %}
+                <div class="subcategories">
+                    {% for child in category.children.all %}
+                    <a href="{% url 'category_detail' child.slug %}" class="subcategory">
+                        {{ child.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

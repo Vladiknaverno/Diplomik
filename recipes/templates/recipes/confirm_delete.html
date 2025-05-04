@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="delete-confirmation">
+    <div class="confirmation-card">
+      <div class="confirmation-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h2 class="confirmation-title">Ви дійсно хочете видалити рецепт?</h2>
+      <p class="confirmation-text">"{{ recipe.title }}" буде видалено назавжди. Цю дію не можна скасувати.</p>
+
+      <form method="post" class="confirmation-form">
+        {% csrf_token %}
+        <div class="confirmation-buttons">
+          <button type="submit" class="btn-delete">
+            <i class="fas fa-trash-alt"></i> Так, видалити
+          </button>
+          <a href="{% url 'recipe_detail' recipe.pk %}" class="btn-cancel">
+            <i class="fas fa-times"></i> Скасувати
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

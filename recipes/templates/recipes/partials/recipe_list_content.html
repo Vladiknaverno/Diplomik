@@ -1,0 +1,117 @@
+{% load static %}
+
+<!-- Об'єднаний блок: Герой з відеофоном та кнопкою -->
+<div class="hero-section">
+  <div class="video-background">
+    <iframe
+      src="https://www.youtube.com/embed/7kx10TJBSR4?autoplay=1&mute=1&controls=0&loop=1&playlist=7kx10TJBSR4&modestbranding=1&enablejsapi=1"
+      frameborder="0"
+      allow="autoplay; fullscreen"
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <div class="hero-content">
+    <div class="logo-container">
+      <img src="{% static 'recipes/logo.jpg' %}" alt="Лого" class="hero-logo">
+      <div class="logo-shine"></div>
+    </div>
+    <h1 class="hero-title">
+      <span class="title-line">Створюй,</span>
+      <span class="title-line">зберігай</span>
+      <span class="title-line">та ділись</span>
+    </h1>
+
+    <div class="hero-button-container">
+      {% if user.is_authenticated %}
+      <a href="{% url 'add_recipe' %}" class="create-recipe-button"
+         hx-get="{% url 'add_recipe' %}" hx-target="#main-content" hx-push-url="true">
+        <span class="button-icon">✨</span>
+        <span class="button-text">Створити рецепт</span>
+      </a>
+      {% else %}
+      <a href="{% url 'login' %}" class="create-recipe-button">
+        <span class="button-icon">🔒</span>
+        <span class="button-text">Увійти для створення рецепту</span>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Блок 3: Категорії -->
+<div class="categories-carousel-container">
+  <div class="categories-header">
+    <h2 class="categories-title">Категорії</h2>
+    <div class="categories-divider"></div>
+  </div>
+
+  <div class="swiper categories-carousel">
+    <div class="swiper-wrapper">
+      {% for category in categories %}
+      <a href="{% url 'all_recipes' %}?category={{ category.id }}" class="swiper-slide category-card" data-category="{{ category.id }}">
+        <div class="category-card-inner">
+          {% if category.image %}
+            <div class="category-image">
+              <img src="{{ category.image.url }}" alt="{{ category.name }}">
+              <div class="image-overlay"></div>
+            </div>
+          {% else %}
+            <div class="category-icon">
+              <i class="fas {{ category.icon }}"></i>
+            </div>
+          {% endif %}
+          <h3 class="category-name">{{ category.name }}</h3>
+          <div class="category-overlay">
+            <span>Переглянути</span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+    <div class="swiper-pagination"></div>
+  </div>
+</div>
+
+<!-- Блок 4: Останні рецепти -->
+<div class="latest-recipes-section" style=" padding-left: 20px; padding-right: 20px;">
+  <div class="categories-header">
+    <h2 class="categories-title">Нові надходження</h2>
+    <div class="categories-divider"></div>
+  </div>
+
+  <div class="recipes-grid">
+    {% for recipe in recipes %}
+    <div class="recipe-card">
+      <div class="recipe-img-container">
+        {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-img">
+        {% else %}
+        <div class="no-image-placeholder">
+          <i class="fas fa-utensils"></i>
+        </div>
+        {% endif %}
+      </div>
+      <div class="recipe-content">
+        <h3 class="recipe-title">{{ recipe.title }}</h3>
+        <p class="recipe-meta">
+          {% if recipe.categories.all %}
+          <span class="type">{{ recipe.categories.first.name }}</span> •
+          {% endif %}
+          Автор: {{ recipe.author.username }} • Дата: {{ recipe.created_at|date:"d.m.Y" }}
+        </p>
+        <a href="{% url 'recipe_detail' recipe.id %}" class="btn">Деталі</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="view-all-container">
+    <a href="{% url 'all_recipes' %}" class="view-all-link"
+       hx-get="{% url 'all_recipes' %}" hx-target="#main-content" hx-push-url="true">
+      Переглянути всі рецепти <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+</div>

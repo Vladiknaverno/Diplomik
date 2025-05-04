@@ -1,0 +1,126 @@
+{% load static %}
+
+<div class="page-header">
+    <h1 class="page-title">Усі рецепти</h1>
+    <p class="page-subtitle">Оберіть, фільтруйте та досліджуйте всі наші страви</p>
+
+    <!-- Блок сортування -->
+    <div class="sort-filter-bar">
+      <div class="sort-buttons">
+        <a href="?sort=newest"
+           hx-get="?sort=newest"
+           hx-target="#main-content"
+           hx-push-url="true"
+           class="btn {% if sort == 'newest' %}active{% endif %}">
+           Найновіші
+        </a>
+
+        <a href="?sort=popular"
+           hx-get="?sort=popular"
+           hx-target="#main-content"
+           hx-push-url="true"
+           class="btn {% if sort == 'popular' %}active{% endif %}">
+           Популярні
+        </a>
+
+        <a href="?sort=oldest"
+           hx-get="?sort=oldest"
+           hx-target="#main-content"
+           hx-push-url="true"
+           class="btn {% if sort == 'oldest' %}active{% endif %}">
+           Найстаріші
+        </a>
+      </div>
+    </div>
+</div>
+
+<div class="content-wrapper">
+  <!-- Сайдбар з фільтрами -->
+  <aside class="filters-sidebar">
+    <form method="get"
+          id="filtersForm"
+          hx-get="{% url 'all_recipes' %}"
+          hx-target="#main-content"
+          hx-push-url="true"
+          class="recipe-filter-form">
+
+      <div class="filters-scrollable">
+        <div class="filter-group">
+          <label for="category">Категорії:</label>
+          {% for main_cat in main_categories %}
+            <div class="category-group">
+              <div class="main-category">
+                {{ main_cat.name }} <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="subcategories">
+                {% for sub_cat in main_cat.children.all %}
+                  <label class="category-option">
+                    <input type="checkbox" name="category" value="{{ sub_cat.id }}"
+                           {% if sub_cat.id|stringformat:"s" in selected_categories %}checked{% endif %}>
+                    <span>{{ sub_cat.name }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Кнопка за межами скрол-зони -->
+      <div class="sticky-reset-btn" style="width: 230px;">
+        <a href="{% url 'all_recipes' %}"
+           class="submit-btn"
+           hx-get="{% url 'all_recipes' %}"
+           hx-target="#main-content"
+           hx-push-url="true">
+           <i class="fas fa-times-circle"></i> Скинути фільтри
+        </a>
+      </div>
+    </form>
+  </aside>
+
+  <!-- Основна колонка з рецептами -->
+  <main class="recipes-main">
+    <div class="recipes-grid">
+      {% if page_obj %}
+        {% for recipe in page_obj %}
+          <div class="recipe-card">
+            <div class="recipe-img-container">
+              {% if recipe.image %}
+              <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-img">
+              {% else %}
+              <div style="background: #333; height: 100%; display: flex; align-items: center; justify-content: center; color: #777;">
+                <i class="fas fa-utensils" style="font-size: 3rem;"></i>
+              </div>
+              {% endif %}
+            </div>
+            <div class="recipe-content">
+              <h3 class="recipe-title">{{ recipe.title }}</h3>
+              <p class="recipe-meta">
+                Автор: {{ recipe.author.username }} • {{ recipe.created_at|date:"d.m.Y" }}
+              </p>
+              <a href="{% url 'recipe_detail' recipe.pk %}" class="btn">Переглянути</a>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="no-recipes-wrapper">
+          <div class="no-recipes">
+            Немає рецептів за вибраними параметрами 🙁
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="btn">Попередня</a>
+      {% endif %}
+      <span class="page-number">Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="btn">Наступна</a>
+      {% endif %}
+    </div>
+  </main>
+</div>

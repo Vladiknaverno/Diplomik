@@ -1,0 +1,88 @@
+<div class="container">
+  <a href="{% url 'profile' %}" class="back-btn">
+    <i class="fas fa-arrow-left"></i> Повернутись до профілю
+  </a>
+
+  <div class="page-header">
+    <h1 class="page-title">Редагування рецепту</h1>
+    <p class="page-subtitle">Внесіть зміни до вашого кулінарного шедевра</p>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="recipe-form">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="{{ form.title.id_for_label }}"><i class="fas fa-heading"></i> Назва рецепту</label>
+      {{ form.title }}
+      {% if form.title.errors %}<div class="error">{{ form.title.errors }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.description.id_for_label }}"><i class="fas fa-align-left"></i> Опис</label>
+      {{ form.description }}
+      {% if form.description.errors %}<div class="error">{{ form.description.errors }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.ingredients.id_for_label }}"><i class="fas fa-list-ul"></i> Інгредієнти</label>
+      {{ form.ingredients }}
+      {% if form.ingredients.errors %}<div class="error">{{ form.ingredients.errors }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.steps.id_for_label }}"><i class="fas fa-list-ol"></i> Кроки приготування</label>
+      {{ form.steps }}
+      {% if form.steps.errors %}<div class="error">{{ form.steps.errors }}</div>{% endif %}
+    </div>
+
+    <div class="image-upload-wrapper">
+      <label><i class="fas fa-camera"></i> Зображення страви</label>
+      {% if form.instance.image %}
+        <div class="current-image">
+          <p>Поточне зображення:</p>
+          <img src="{{ form.instance.image.url }}" alt="Поточне зображення рецепту">
+        </div>
+      {% endif %}
+
+      <div class="image-upload" onclick="document.getElementById('image-upload-input').click()">
+        <i class="fas fa-camera-retro"></i>
+        <div class="image-upload-text" id="file-name">
+          {% if form.instance.image %}Змінити зображення{% else %}Додати зображення{% endif %}
+        </div>
+      </div>
+      <input type="file" id="image-upload-input" name="image" accept="image/*" style="display: none;">
+    </div>
+
+    <div class="buttons-container">
+      <button type="submit" class="btn submit-btn">
+        <i class="fas fa-save"></i> Зберегти зміни
+      </button>
+      <a href="{% url 'profile' %}" class="btn cancel-btn">
+        <i class="fas fa-times"></i> Скасувати
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Обробник для відображення імені файлу
+  document.getElementById('image-upload-input').addEventListener('change', function(e) {
+    const fileNameElement = document.getElementById('file-name');
+    const uploadIcon = document.querySelector('.image-upload i');
+    const uploadBlock = document.querySelector('.image-upload');
+
+    if (this.files.length > 0) {
+      uploadIcon.className = 'fas fa-check-circle';
+      uploadIcon.style.color = '#4CAF50';
+      fileNameElement.textContent = this.files[0].name;
+      uploadBlock.style.borderColor = "#4CAF50";
+      uploadBlock.style.backgroundColor = "rgba(76, 175, 80, 0.1)";
+    } else {
+      uploadIcon.className = 'fas fa-camera-retro';
+      uploadIcon.style.color = '#FF6B00';
+      fileNameElement.textContent = "{% if form.instance.image %}Змінити зображення{% else %}Додати зображення{% endif %}";
+      uploadBlock.style.borderColor = "#333";
+      uploadBlock.style.backgroundColor = "rgba(255, 255, 255, 0.02)";
+    }
+  });
+</script>
