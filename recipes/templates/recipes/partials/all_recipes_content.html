@@ -4,6 +4,20 @@
     <h1 class="page-title">Усі рецепти</h1>
     <p class="page-subtitle">Оберіть, фільтруйте та досліджуйте всі наші страви</p>
 
+    <!-- 🔍 Форма пошуку -->
+    <form method="get" action="{% url 'all_recipes' %}" style="margin: 20px 0;">
+        <input type="text" name="q" placeholder="Пошук рецептів..."
+               value="{{ request.GET.q }}" class="form-control" style="display:inline-block; width: 75%;" />
+        <button type="submit" class="btn btn-primary" style="display:inline-block;">Пошук</button>
+
+        {% for cat in selected_categories %}
+            <input type="hidden" name="category" value="{{ cat }}">
+        {% endfor %}
+        {% if sort %}
+            <input type="hidden" name="sort" value="{{ sort }}">
+        {% endif %}
+    </form>
+
     <!-- Блок сортування -->
     <div class="sort-filter-bar">
       <div class="sort-buttons">
@@ -32,6 +46,7 @@
         </a>
       </div>
     </div>
+
 </div>
 
 <div class="content-wrapper">

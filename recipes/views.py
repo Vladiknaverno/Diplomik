@@ -1,3 +1,4 @@
+import query
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, logout
@@ -33,11 +34,11 @@ def add_recipe(request):
 
 def recipe_list(request):
     recipes = Recipe.objects.all().order_by('-created_at')[:6]
-    categories = Category.objects.filter(parent__isnull=True)  # ✅ основні категорії для каруселі
+    categories = Category.objects.filter(parent__isnull=True)  # основні категорії для каруселі
 
     context = {
         'recipes': recipes,
-        'categories': categories,  # ✅ додаємо
+        'categories': categories,
     }
 
     if request.headers.get('HX-Request') == 'true':
@@ -77,6 +78,9 @@ def recipe_detail(request, pk):
 def all_recipes(request):
     recipes = Recipe.objects.all()
     selected_categories = request.GET.getlist('category')
+    query = request.GET.get('q')
+    if query:
+        recipes = recipes.filter(title__icontains=query)
 
     if selected_categories:
         selected_category_ids = []
@@ -89,7 +93,6 @@ def all_recipes(request):
                     child_ids = category.children.values_list('id', flat=True)
                     selected_category_ids.extend(child_ids)
                 else:
-                    # Це вже підкатегорія → додаємо її саму
                     selected_category_ids.append(category.id)
             except Category.DoesNotExist:
                 pass
