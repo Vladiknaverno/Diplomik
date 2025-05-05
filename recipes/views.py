@@ -1,4 +1,4 @@
-import query
+
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, logout
