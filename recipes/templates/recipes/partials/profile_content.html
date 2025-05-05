@@ -83,7 +83,7 @@
     {% if recipes|length > 4 %}
     <div style="text-align: center; margin-top: 20px;">
       <a href="{% url 'user_recipes' user.username %}" class="btn btn-primary">
-        <i class="fas fa-list"></i> Всі мої рецепти ({{ recipes.count }})
+        <i class="fas fa-list"></i> Всі мої рецепти ({{ recipes.length }})
       </a>
     </div>
     {% endif %}
@@ -134,7 +134,7 @@
     {% if saved_recipes|length > 4 %}
     <div style="text-align: center; margin-top: 20px;">
       <a href="{% url 'saved_recipes' %}" class="btn btn-primary">
-        <i class="fas fa-list"></i> Всі збережені рецепти ({{ saved_recipes.count }})
+        <i class="fas fa-list"></i> Всі збережені рецепти ({{ saved_recipes.length }})
       </a>
     </div>
     {% endif %}
