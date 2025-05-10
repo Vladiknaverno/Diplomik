@@ -90,33 +90,11 @@ class Recipe(models.Model):
         null=True,
         blank=True
     )
-    likes = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        through='Like',
-        related_name='liked_recipes',
-        blank=True
-    )
     def __str__(self):
         return self.title
 
     rating = models.FloatField(default=0)  # середній рейтинг
     ratings_count = models.PositiveIntegerField(default=0)  # кількість оцінок
-    @property
-    def like_count(self):
-        return self.likes.count()
-
-    def is_liked_by(self, user):
-        if not user.is_authenticated:
-            return False
-        return self.likes.filter(id=user.id).exists()
-
-class Like(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'recipe')  # Користувач може лайкнути рецепт лише один раз
 
 class Rating(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -135,3 +113,42 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Коментар від {self.user.username} до {self.recipe.title}'
+
+class Follow(models.Model):
+    follower = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='following',
+        on_delete=models.CASCADE
+    )
+    following = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='followers',
+        on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+
+    def __str__(self):
+        return f"{self.follower.username} → {self.following.username}"
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='notifications',
+        on_delete=models.CASCADE
+    )
+    message = models.CharField(max_length=255)
+    recipe = models.ForeignKey(  # 🆕
+        'Recipe',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"To {self.recipient.username}: {self.message}"
+

@@ -1,0 +1,83 @@
+{% load static %}
+<div class="container profile-page">
+  <!-- Шапка профілю автора -->
+  <section class="profile-header">
+    <h1>Профіль: {{ author.username }}</h1>
+    <p>Публічний профіль з кулінарними рецептами</p>
+  </section>
+
+  <!-- Аватар і деталі -->
+  <section class="profile-info">
+    {% if author.profile_picture %}
+    <img src="{{ author.profile_picture.url }}" alt="Аватар" class="profile-avatar">
+    {% else %}
+    <img src="https://res.cloudinary.com/drbcpofzd/image/upload/v1746451012/default-avatar_gkinny.png" alt="Аватар" class="profile-avatar">
+    {% endif %}
+
+    <div class="user-details">
+      <p><strong>Нікнейм:</strong> {{ author.username }}</p>
+      <p><strong>Дата реєстрації:</strong> {{ author.date_joined|date:"d.m.Y" }}</p>
+
+      <!-- Кнопка підписки -->
+      {% if request.user != author %}
+      <form method="post" action="{% url 'toggle_follow' author.username %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">
+          {% if is_following %}Відписатися{% else %}Підписатися{% endif %}
+        </button>
+      </form>
+      {% endif %}
+    </div>
+
+    <div class="profile-stats">
+      <div class="stat-item">
+        <div class="stat-value">{{ recipes.count }}</div>
+        <div class="stat-label">Рецептів</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ avg_rating|default:"0.0" }}
+          {% for i in "12345" %}
+            {% with num=i|add:"0" %}
+              <i class="fa-star {% if avg_rating >= num %}fas{% else %}far{% endif %}"></i>
+            {% endwith %}
+          {% endfor %}
+        </div>
+        <div class="stat-label">Середній рейтинг</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Рецепти автора -->
+  <section id="author-recipes">
+    <h2 class="section-title"><i class="fas fa-book-open"></i> Рецепти {{ author.username }}</h2>
+
+    {% if recipes %}
+    <div class="recipes-grid">
+      {% for recipe in recipes %}
+      <div class="recipe-card">
+        <div class="recipe-img-container">
+          {% if recipe.image %}
+          <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-img">
+          {% else %}
+          <div class="no-image"><i class="fas fa-utensils fa-2x"></i></div>
+          {% endif %}
+        </div>
+
+        <div class="recipe-content">
+          <h3 class="recipe-title">{{ recipe.title }}</h3>
+          <p class="recipe-meta">
+            <i class="fas fa-calendar-alt"></i> {{ recipe.created_at|date:"d.m.Y" }}
+            <i class="fas fa-star"></i> {{ recipe.rating|default:"0.0" }}
+          </p>
+          <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-primary">
+            <i class="fas fa-eye"></i> Переглянути
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align: center;">Поки що немає рецептів 🥲</p>
+    {% endif %}
+  </section>
+</div>

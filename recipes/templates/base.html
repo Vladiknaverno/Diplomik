@@ -91,6 +91,75 @@
             transform: translateX(0);
         }
 
+        .icon-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          background: rgba(255, 107, 0, 0.15);
+          color: var(--accent);
+          margin-right: 10px;
+          text-decoration: none;
+          font-size: 1.2rem;
+          transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+          background: var(--accent);
+          color: var(--primary-bg);
+          transform: scale(1.1);
+          box-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
+        }
+
+        .notification-dropdown {
+          position: relative;
+          display: inline-block;
+        }
+
+        .notification-menu {
+          display: none;
+          position: absolute;
+          right: 0;
+          top: 45px;
+          background-color: var(--card-bg);
+          min-width: 250px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+          z-index: 999;
+          padding: 15px;
+          color: var(--primary-text);
+          font-size: 0.95rem;
+        }
+
+        .notification-menu p {
+          margin: 0 0 10px;
+          padding: 5px 0;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .notification-menu p:last-child {
+          border-bottom: none;
+        }
+
+        .notification-item {
+          background-color: var(--card-bg);
+          border: 1px solid var(--border);
+          padding: 15px;
+          margin-bottom: 12px;
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+          background-color: rgba(255,107,0,0.05);
+          border-color: var(--accent);
+        }
+
         .auth-btn:hover .btn-icon {
             transform: scale(1.1);
         }
@@ -2889,22 +2958,6 @@
             outline: none !important;
         }
 
-        #likeBtn {
-          background-color: transparent;
-          border: 1px solid #ff4d4d;
-          color: #ff4d4d;
-          padding: 8px 16px;
-          border-radius: 25px;
-          font-size: 16px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        #likeBtn.liked {
-          background-color: #ff4d4d;
-          color: white;
-        }
-
         .comments-section {
             margin-top: 50px;
             padding: 30px;
@@ -3370,7 +3423,6 @@
 
   function initAll() {
     if (typeof initSaveButtons === 'function') initSaveButtons();
-    if (typeof initLikeButtons === 'function') initLikeButtons();
     if (typeof initProfile === 'function') initProfile();
     if (typeof initAllRecipes === 'function') initAllRecipes();
     if (typeof initCategorySelect === 'function') initCategorySelect();
@@ -3541,15 +3593,44 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 </script>
 <script>
-document.addEventListener('htmx:afterSwap', (e) => {
-  if (document.getElementById('background-video')) {
-    const video = document.getElementById('background-video');
-    video.play().catch(() => {
-      video.muted = true;
-      video.play();
+  document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("notificationBtn");
+    const menu = document.getElementById("notificationMenu");
+
+    if (btn && menu) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (menu.innerHTML.trim() !== "") {
+          menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+          menu.style.display = "none";
+        }
+      });
+    }
+
+    // Переходи по <a class="notification-link"> або <button class="notification-button">
+    document.body.addEventListener('click', function (e) {
+      const link = e.target.closest('.notification-link');
+      const button = e.target.closest('.notification-button');
+
+      let url = null;
+      if (link) {
+        e.preventDefault();
+        url = link.getAttribute('href');
+      } else if (button) {
+        url = button.getAttribute('data-url');
+      }
+
+      if (url) {
+        if (menu) menu.style.display = 'none';
+        window.location.href = url;
+      }
     });
-  }
-});
+  });
 </script>
 </body>
 </html>

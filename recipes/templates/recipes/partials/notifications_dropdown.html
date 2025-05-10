@@ -1,0 +1,33 @@
+<div id="notification-dropdown">
+  <form
+    method="POST"
+    hx-post="{% url 'clear_notifications' %}"
+    hx-target="#notification-dropdown"
+    hx-swap="outerHTML"
+    style="margin-top: 10px; text-align: right;"
+  >
+    {% csrf_token %}
+    <button type="submit"
+            style="background: crimson; color: white; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer;">
+      Очистити
+    </button>
+  </form>
+
+  {% for note in notifications %}
+    <div class="notification-item {% if not note.is_read %}unread{% endif %}">
+      <div>
+        {{ note.message }}<br>
+        <small style="opacity: 0.7;">{{ note.created_at|date:"d.m.Y H:i" }}</small>
+      </div>
+      {% if note.recipe %}
+        <a href="{% url 'recipe_detail' note.recipe.id %}"
+           class="btn"
+           style="margin-top: 8px; display: inline-block; padding: 6px 12px; font-size: 0.9rem; background: orange; color: black; border-radius: 4px; text-decoration: none;">
+          Переглянути
+        </a>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p style="padding: 8px;">Немає сповіщень</p>
+  {% endfor %}
+</div>

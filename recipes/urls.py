@@ -27,11 +27,16 @@ urlpatterns = [
         template_name='registration/change_password.html',
         success_url='/profile/'
     ), name='change_password'),
-    path('recipes/<int:pk>/like/', views.like_recipe, name='like_recipe'),
     path('recipe/<int:pk>/save/', views.save_recipe, name='save_recipe'),
     path('recipe/<int:pk>/unsave/', views.unsave_recipe, name='unsave_recipe'),
     path('recipes/<int:pk>/add_comment/', views.add_comment, name='add_comment'),
     path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
     path('comment/<int:comment_id>/edit/', views.edit_comment, name='edit_comment'),
     path('recipe/<int:pk>/rate/', views.rate_recipe, name='rate_recipe'),
+    path('report-bug/', views.report_bug, name='report_bug'),
+    path('notifications/', views.notifications, name='notifications'),
+    path('profile/<str:username>/', views.user_profile, name='user_profile'),
+    path('profile/<str:username>/follow/', views.toggle_follow, name='toggle_follow'),
+    path('notifications/dropdown/', views.notifications_dropdown, name='notifications_dropdown'),
+    path('notifications/clear/', views.clear_notifications, name='clear_notifications'),
 ]

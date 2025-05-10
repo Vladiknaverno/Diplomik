@@ -39,6 +39,30 @@
 
     <!-- Справа: профіль / вхід -->
     <div class="navbar-right">
+      <!-- Кнопка: Повідомити про помилку -->
+      <a href="https://forms.gle/твоя-форма" target="_blank" class="icon-btn" title="Повідомити про помилку">
+        <i class="fas fa-bug"></i>
+      </a>
+
+      <!-- Кнопка + меню сповіщень -->
+      <div class="notification-dropdown" style="position: relative;">
+        <button class="icon-btn"
+                id="notificationBtn"
+                hx-get="{% url 'notifications_dropdown' %}"
+                hx-target="#notificationMenu"
+                hx-swap="innerHTML"
+                hx-trigger="click"
+                title="Сповіщення">
+          <i class="fas fa-bell"></i>
+        </button>
+
+        <div id="notificationMenu"
+             class="notification-menu"
+             style="position: absolute; top: 100%; right: 0; display: none; background: #1e1e1e; width: 300px; max-height: 400px; overflow-y: auto; z-index: 999;">
+          <!-- Сюди HTMX підставить notifications_dropdown.html -->
+        </div>
+      </div>
+
       {% if user.is_authenticated %}
         <a href="{% url 'profile' %}"
            hx-get="{% url 'profile' %}"

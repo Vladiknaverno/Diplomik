@@ -4,13 +4,16 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Category, Recipe, Like, Comment, Rating
+from .models import Category, Recipe, Comment, Rating, Follow, Notification
 from django.core.paginator import Paginator
 from .forms import RecipeForm, LoginForm, RegisterForm
 from django.views.decorators.http import require_POST
 from django.template.loader import render_to_string
-from django.db.models import Count, Avg
+from django.db.models import Avg
 import json
+from django.contrib.auth import get_user_model
+User = get_user_model()
+from django.views.decorators.http import require_POST
 
 @login_required
 def add_recipe(request):
@@ -20,7 +23,19 @@ def add_recipe(request):
             recipe = form.save(commit=False)
             recipe.author = request.user
             recipe.save()
-            form.save_m2m()  # Це важливо для збереження many-to-many зв'язків (категорій)
+            form.save_m2m()
+
+            # ✅ Створюємо сповіщення для підписників
+            followers = Follow.objects.filter(following=request.user).values_list('follower', flat=True)
+            Notification.objects.bulk_create([
+                Notification(
+                    recipient_id=follower_id,
+                    message=f"{request.user.username} додав новий рецепт: {recipe.title}",
+                    recipe=recipe  # 🆕
+                )
+                for follower_id in followers
+            ])
+
             return redirect('recipe_detail', pk=recipe.pk)
     else:
         form = RecipeForm()
@@ -62,13 +77,8 @@ def recipe_detail(request, pk):
     recipe.ingredients_as_list = recipe.ingredients.split('\n')
     recipe.steps_as_list = recipe.steps.split('\n')
 
-    is_liked = False
-    if request.user.is_authenticated:
-        is_liked = recipe.likes.filter(id=request.user.id).exists()
-
     context = {
         'recipe': recipe,
-        'is_liked': is_liked,
         'is_saved': recipe in request.user.saved_recipes.all() if request.user.is_authenticated else False,
         'comments': comments,
     }
@@ -167,6 +177,75 @@ def category_view(request, slug):
     }
     return render(request, 'recipes/category_detail.html', context)
 
+@login_required
+def report_bug(request):
+    return redirect("https://forms.gle/твоя-форма")  # заміни на свою URL
+
+# Відображення сповіщень (поки що тестові)
+@login_required
+def notifications(request):
+    # Отримати всі сповіщення
+    notes = request.user.notifications.order_by('-created_at')[:20]
+
+    # ✅ Відмітити їх як прочитані
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+
+    return render(request, 'recipes/notifications.html', {'notifications': notes})
+
+@require_POST
+@login_required
+def clear_notifications(request):
+    request.user.notifications.all().delete()
+    if request.headers.get('HX-Request'):
+        return render(request, 'recipes/partials/notifications_dropdown.html', {'notifications': []})
+    return redirect('notifications')
+
+@login_required
+def notifications_dropdown(request):
+    notes = request.user.notifications.order_by('-created_at')[:10]
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+    return render(request, 'recipes/partials/notifications_dropdown.html', {'notifications': notes})
+
+
+@login_required
+def toggle_follow(request, username):
+    author = get_object_or_404(User, username=username)
+
+    if author == request.user:
+        return redirect('user_profile', username=username)
+
+    follow, created = Follow.objects.get_or_create(
+        follower=request.user,
+        following=author
+    )
+
+    if not created:
+        follow.delete()
+
+    return redirect('user_profile', username=username)
+
+@login_required
+def user_profile(request, username):
+    author = get_object_or_404(User, username=username)
+    recipes = author.recipes.all()
+    avg_rating = recipes.aggregate(avg=Avg('rating'))['avg'] or 0
+    avg_rating = round(avg_rating, 1)
+    is_following = Follow.objects.filter(follower=request.user, following=author).exists()
+
+    context = {
+        'author': author,
+        'recipes': recipes,
+        'avg_rating': avg_rating,
+        'is_following': is_following,
+    }
+
+    if request.headers.get("Hx-Request") == "true":
+        # HTMX запит → повертаємо тільки вміст
+        html = render_to_string("recipes/partials/user_profile_content.html", context, request=request)
+        return HttpResponse(html)
+    else:
+        # Повна сторінка (напряму через URL)
+        return render(request, "recipes/user_profile.html", context)
 
 def contacts(request):
     template = 'recipes/contacts.html'
@@ -315,26 +394,6 @@ def search_categories(request):
     categories = Category.objects.filter(name__icontains=term)[:10]  # Обмежуємо 10 результатами
     results = [{'id': c.id, 'name': c.name} for c in categories]
     return JsonResponse(results, safe=False)
-
-
-@require_POST
-@login_required
-def like_recipe(request, pk):
-    recipe = get_object_or_404(Recipe, pk=pk)
-    user = request.user
-
-    if recipe.is_liked_by(user):
-        Like.objects.filter(user=user, recipe=recipe).delete()
-        liked = False
-    else:
-        Like.objects.create(user=user, recipe=recipe)
-        liked = True
-
-    html = render_to_string('recipes/partials/like_button.html', {
-        'recipe': recipe,
-        'is_liked': liked,
-    })
-    return HttpResponse(html)
 
 @require_POST
 @login_required
