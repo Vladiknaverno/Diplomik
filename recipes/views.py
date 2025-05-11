@@ -81,6 +81,7 @@ def recipe_detail(request, pk):
         'recipe': recipe,
         'is_saved': recipe in request.user.saved_recipes.all() if request.user.is_authenticated else False,
         'comments': comments,
+        'avg_rating': recipe.rating or 0,
     }
     return render(request, 'recipes/recipe_detail.html', context)
 
@@ -305,15 +306,16 @@ def profile(request):
     recipes = user.recipes.all()
     saved_recipes = user.saved_recipes.all()
 
-    avg_rating = user.recipes.aggregate(avg=Avg('rating'))['avg'] or 0
+    avg_rating = recipes.aggregate(avg=Avg('rating'))['avg'] or 0  # 🛠️ було: user.recipes.aggregate...
     avg_rating = round(avg_rating, 1)
+
     total_comments = Comment.objects.filter(user=user).count()
 
     context = {
         'user': user,
         'recipes': recipes,
         'saved_recipes': saved_recipes,
-        'avg_rating': avg_rating,
+        'avg_rating': avg_rating,  # 🆕 ДОДАНО
         'total_comments': total_comments,
     }
 
