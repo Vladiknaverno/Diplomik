@@ -115,7 +115,10 @@
               <p class="recipe-meta">
                 Автор: {{ recipe.author.username }} • {{ recipe.created_at|date:"d.m.Y" }}
               </p>
-              <a href="{% url 'recipe_detail' recipe.pk %}" class="btn">Переглянути</a>
+              <div class="recipe-buttons" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                  <a href="{% url 'recipe_detail' recipe.pk %}" class="btn">Переглянути</a>
+
+                </div>
             </div>
           </div>
         {% endfor %}
@@ -138,5 +141,6 @@
       <a href="?page={{ page_obj.next_page_number }}" class="btn">Наступна</a>
       {% endif %}
     </div>
+
   </main>
 </div>

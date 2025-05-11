@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 
 class User(AbstractUser):
@@ -90,6 +91,9 @@ class Recipe(models.Model):
         null=True,
         blank=True
     )
+
+    def get_absolute_url(self):
+        return reverse('recipe_detail', args=[str(self.pk)])
     def __str__(self):
         return self.title
 
@@ -151,4 +155,3 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"To {self.recipient.username}: {self.message}"
-

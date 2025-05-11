@@ -19,13 +19,14 @@
           <div class="recipe-meta-item">
             <i class="fas fa-user"></i>
             <a
-      href="{% url 'user_profile' recipe.author.username %}"
-      hx-get="{% url 'user_profile' recipe.author.username %}"
-      hx-target="#main-content"
-      hx-push-url="true"
-      class="author-link">
-        {{ recipe.author.username }}
-    </a>
+              href="{% url 'user_profile' recipe.author.username %}"
+              hx-get="{% url 'user_profile' recipe.author.username %}"
+              hx-target="#main-content"
+              hx-push-url="true"
+              class="author-link"
+              >
+                {{ recipe.author.username }}
+            </a>
           </div>
           <div class="recipe-meta-item">
             <i class="fas fa-calendar-alt"></i>
